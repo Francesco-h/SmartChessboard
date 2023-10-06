@@ -4,21 +4,33 @@ int colonne_app,righe_app,pos=0,promotion=-1,temp=0,temp_col1,temp_righe1; //int
 char pos1,pos2; //valore precedente e attuale della colonna
 int posi1,posi2;  //valore precedente e attuale della riga
 //configurazione pulsanti, andrà implementato un'altro file dato che ci saranno 64 sensori
-int a1=10;
-int a2=11;
-int b1=8;
-int b2=9;
+int a1=4;
+int a2=2;
+int b1=3;
+int b2=5;
 const int n=2;
 const int m=2;
 //scacchiere sotto forma di matrici attuale e di appoggio per vedere cosa è cambiato
-int scacchiera [n][m]={ {0,2}, 
-                        {1,0}
+int scacchiera [n][m]={ {0,0}, 
+                        {2,9}
                         };
-int appoggio [n][m]={   {0,2}, 
-                        {1,0}
+int appoggio [n][m]={   {0,0}, 
+                        {2,9}
                         };
 
 
+void Elimina()
+{
+
+	int i,j;
+	for (i = 0; i < m; i++)
+		for(j = 0; j < n; j++)
+		{
+      if(scacchiera[i][j]==-1)
+			  scacchiera[i][j]=0;
+		}
+    Copy();
+}
 
 //copia i valori della scacchiera attuale con quella di appoggio
 void Copy()
@@ -58,6 +70,8 @@ void riempi()
   }
   else{
     temp=scacchiera[1][0];
+    Serial.print("temppp: ");
+    Serial.println(temp);
     scacchiera[1][0]=0;
   }
   
@@ -65,15 +79,15 @@ void riempi()
     
   }
   else{
-    temp=scacchiera[1][1];
-    scacchiera[1][1]=0;
+    temp=scacchiera[0][0];
+    scacchiera[0][0]=0;
   }
   if(!digitalRead(b1)==0){
    
   }
   else{
-    temp=scacchiera[0][0];
-    scacchiera[0][0]=0;
+    temp=scacchiera[1][1];
+    scacchiera[1][1]=0;
   }
   if(!digitalRead(b2)==0){
    
@@ -83,7 +97,7 @@ void riempi()
     scacchiera[0][1]=0;
   }
     
-  
+  return;
 }
 
 //stampa le 2 scacchiere
@@ -110,6 +124,10 @@ void Stampa()
 		  }*/
     Serial.println(" ");
     Serial.println(" ");
+    Serial.println(digitalRead(a1));
+    Serial.println(digitalRead(a2));
+    Serial.println(digitalRead(b1));
+    Serial.println(digitalRead(b2));
     Serial.println(" ");
     Serial.println(" ");
 }
@@ -146,8 +164,27 @@ void coordinate(int colonne, int righe){
 
 //stampa la notazione smith della mossa
 void stampacoordinate(){
-  Serial.print(pos1);
-  Serial.print(posi1);
+  switch(temp){
+    case 1:
+      break;
+    case 2:
+      Serial.print("N");
+      break;
+    case 3:
+      Serial.print("B");
+      break;
+    case 5:
+      Serial.print("R");
+      break;
+    case 6:
+      Serial.print("K");
+      break;
+    case 9:
+      Serial.print("Q");
+      break;
+    
+
+  }
   Serial.print(pos2);
   Serial.print(posi2);
   if(promotion==1){
@@ -213,11 +250,11 @@ void riempi_temp()
   }
   
   if(digitalRead(a2)==0){
-    scacchiera[1][1]=-1;
+    scacchiera[0][0]=-1;
   }
  
   if(digitalRead(b1)==0){
-   scacchiera[0][0]=-1;
+   scacchiera[1][1]=-1;
   }
   if(digitalRead(b2)==0){
    scacchiera[0][1]=-1;
@@ -227,18 +264,22 @@ void riempi_temp()
 
 void setup() {
   //pulsanti che andranno tolti e sostituiti
-  pinMode(a1, INPUT_PULLUP);
-  pinMode(a2, INPUT_PULLUP);
-  pinMode(b1, INPUT_PULLUP);
-  pinMode(b2, INPUT_PULLUP);
+  pinMode(a1, INPUT);
+  pinMode(a2, INPUT);
+  pinMode(b1, INPUT);
+  pinMode(b2, INPUT);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 void loop() {
   int check;
-  if(!temp)
+  if(temp==-1)
+    temp=0;
+  if(temp==0){
     riempi();
+    Elimina();
+  }
   else
     riempi_temp();
   check=Controllo();  //restituisce 1 se è stato cambiato qualcosa e se lo è stato calcola cosa
@@ -248,12 +289,14 @@ void loop() {
       coordinate(colonne_app,righe_app);
     else
       coordinate2(colonne_app,righe_app);
-    if(pos==-1)
-      pos++;
+    
     Copy();
   }
   Stampa();
-  delay(900);
+  Serial.print("temp: ");
+  Serial.println(temp);
+  
+  delay(3000);
   
   
 }
